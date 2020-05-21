@@ -7,7 +7,7 @@ import gspread # Library to interact with Google Spreadsheets
 from oauth2client.service_account import ServiceAccountCredentials # To access Google Account
 
 # Global variables
-hunter_api_key = "48208a1a898e1aa968ba499e6267a03c24980fea" # API key that tells Hunter who we are when we make a GET request
+hunter_api_key = "77ba2c007af558e5f8bfbcd4841a958bacb9467c" # API key that tells Hunter who we are when we make a GET request
 
 contact_info = {} # dictionary where we'll store each contact's information
 
@@ -46,6 +46,10 @@ def get_email_from_hunter(first_name, last_name, domain_name):
 
     response = requests.get(url, params=parametres)
 
+    # If nothing found, return an empty dictionary
+    if response.status_code != 200: # If invalid response, return an empty list
+        return {}
+
     json_data = response.json()
 
     email_address = json_data["data"]["email"]
@@ -60,7 +64,6 @@ def get_email_from_hunter(first_name, last_name, domain_name):
 
     print(contact_info)
     return contact_info
-
 
 #get_email_from_hunter("Joyce", "Kettering", "creativeandproductive.com")
 
@@ -77,11 +80,11 @@ def get_emails_from_list(people):
 
 # TODO: SECTION C — Run get email function through a list of people in a Google Sheet and updated sheet with emails found
 ## Set up worksheet where I'll want to get and push my data
-workbook_url = "https://docs.google.com/spreadsheets/d/1EY6xvufNfQ3_OPQA6yCWUjcl4dx4ydkdkJ1Of5BlCI8/edit?usp=sharing"
+workbook_url = "https://docs.google.com/spreadsheets/d/1Kl2dAwBMFkQGV7h_oyB6Ukcf6f6PHwcQisYMk3Gfz1w/edit?usp=sharing"
 
 ## Authenticate myself to Google 
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"] # I want to access Google Sheets and Google Drive (this is my scope)
-json_file = "enrich-contact-list-d77bde75bc8c.json" # I have a JSON file in my project folder to prove my credentials 
+json_file = "api-hunter-af55832a0fa1.json" # I have a JSON file in my project folder to prove my credentials 
 credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file, scope) # I tell Google "These are my credentials and the scope I want to access"
 gc = gspread.authorize(credentials) # I ask for authorization to access my Google account
 
@@ -90,7 +93,7 @@ def get_data_from_workbook():
     workbook = gc.open_by_url(workbook_url) # Define workbook we're going to work with
     get_data_sheet = workbook.get_worksheet(0) # Define first sheet in workbook where we're going to fetch the list of people we want to lookup
     contacts = get_data_sheet.get_all_records() # Define where liste of people is
-    print(contacts)
+    #print(contacts)
     return contacts
 
 ## Post results to worksheet
@@ -106,14 +109,15 @@ def push_data_to_workbook(contact_info):
         domain_name = contact["domain_name"]
 
         contact_info = get_email_from_hunter(first_name, last_name, domain_name)
+        print(contact_info)
+        print(type(contact_info))
 
-        email_address = contact_info["email_address"]
-        confidence_score = contact_info["confidence_score"]
+        email_address = contact_info.get("email_address") # Will return None if no email_address found in dict vs contact_info["email_address"] would return KeyError
+        confidence_score = contact_info.get("confidence_score")
 
         row = [first_name, last_name, domain_name, email_address, confidence_score] # Define in which columns values go
         index += 1 # Add a line every time you go through the loop
         push_data_sheet.insert_row(row,index) # Add row to index line
-
 
 get_data_from_workbook()
 push_data_to_workbook(contact_info)
