@@ -6,7 +6,7 @@ from pprint import pprint # To pretty print json info in a more readable format
 
 
 # Global variables
-hunter_api_key = "355b532c0dec53884899abd5f581ab787437ebd1" # API key that tells Hunter who we are when we make a GET request
+hunter_api_key = "thiswillbeastringyoucreateinyourhunteraccount" # API key that tells Hunter who we are when we make a GET request
 contacts = [] # list where we'll store our contacts
 contact_info = {} # dictionary where we'll store each contact's information
 
@@ -44,7 +44,7 @@ def get_email_from_hunter(first_name, last_name, domain_name):
 get_email_from_hunter("Joyce", "Kettering", "creativeandproductive.com")
 
 # TODO: SECTION B — Run get email function through a list of people hard-coded in script
-people = []
+people = {}
 
 
 

@@ -7,7 +7,7 @@ import gspread # Library to interact with Google Spreadsheets
 from oauth2client.service_account import ServiceAccountCredentials # To access Google Account
 
 # Global variables
-hunter_api_key = "77ba2c007af558e5f8bfbcd4841a958bacb9467c" # API key that tells Hunter who we are when we make a GET request
+hunter_api_key = "thiswillbeastringyoucreateinyourhunteraccount" # API key that tells Hunter who we are when we make a GET request
 
 contact_info = {} # dictionary where we'll store each contact's information
 
@@ -18,14 +18,8 @@ people = [
         "last_name": "Kettering", 
         "domain_name": "creativeandproductive.com"
         },
-        {
-            "ID": 2, 
-            "first_name": "Quentin", 
-            "last_name": "Durantay", 
-            "domain_name": "dolead.com"
-            }, 
             {
-                "ID": 3, 
+                "ID": 2, 
                 "first_name": "Ziggy", 
                 "last_name": "Stardust", 
                 "domain_name": "mairie-paris.fr"
@@ -48,7 +42,10 @@ def get_email_from_hunter(first_name, last_name, domain_name):
 
     # If nothing found, return an empty dictionary
     if response.status_code != 200: # If invalid response, return an empty list
-        return {}
+        contact_info["email_address"] = "unknown"
+        contact_info["confidence_score"] = "N/A"
+        return contact_info
+
 
     json_data = response.json()
 
@@ -78,29 +75,30 @@ def get_emails_from_list(people):
 #get_emails_from_list(people)
 
 
-# TODO: SECTION C — Run get email function through a list of people in a Google Sheet and updated sheet with emails found
+# SECTION C — Run get email function through a list of people in a Google Sheet and updated sheet with emails found
 ## Set up worksheet where I'll want to get and push my data
-workbook_url = "https://docs.google.com/spreadsheets/d/1Kl2dAwBMFkQGV7h_oyB6Ukcf6f6PHwcQisYMk3Gfz1w/edit?usp=sharing"
+workbook_url = "urlyougetwhenyoushareyourgooglesheet"
 
 ## Authenticate myself to Google 
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"] # I want to access Google Sheets and Google Drive (this is my scope)
-json_file = "api-hunter-af55832a0fa1.json" # I have a JSON file in my project folder to prove my credentials 
-credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file, scope) # I tell Google "These are my credentials and the scope I want to access"
-gc = gspread.authorize(credentials) # I ask for authorization to access my Google account
+json_file = "jsonfilename.json"
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+credentials = ServiceAccountCredentials.from_json_keyfile_name(json_file, scope)
+gc = gspread.authorize(credentials)
+
 
 ## Get data from worksheet
 def get_data_from_workbook():
-    workbook = gc.open_by_url(workbook_url) # Define workbook we're going to work with
-    get_data_sheet = workbook.get_worksheet(0) # Define first sheet in workbook where we're going to fetch the list of people we want to lookup
-    contacts = get_data_sheet.get_all_records() # Define where liste of people is
+    workbook = gc.open_by_url(workbook_url)
+    get_data_sheet = workbook.get_worksheet(0)
+    contacts = get_data_sheet.get_all_records()
     #print(contacts)
     return contacts
 
 ## Post results to worksheet
-def push_data_to_workbook(contact_info):
+def push_data_to_workbook():
     workbook = gc.open_by_url(workbook_url)
-    push_data_sheet = workbook.get_worksheet(1) # Define second sheet in workbook where we're going to push the results of our API request
-    index = 1 # start on line 2 (index 0 corresponds to line 1 with the titles of our columns)
+    push_data_sheet = workbook.get_worksheet(1)
+    index = 1
     contacts = get_data_from_workbook()
 
     for contact in contacts:
@@ -109,17 +107,15 @@ def push_data_to_workbook(contact_info):
         domain_name = contact["domain_name"]
 
         contact_info = get_email_from_hunter(first_name, last_name, domain_name)
-        print(contact_info)
-        print(type(contact_info))
 
-        email_address = contact_info.get("email_address") # Will return None if no email_address found in dict vs contact_info["email_address"] would return KeyError
-        confidence_score = contact_info.get("confidence_score")
+        email_address = contact_info["email_address"]
+        confidence_score = contact_info["confidence_score"]
 
-        row = [first_name, last_name, domain_name, email_address, confidence_score] # Define in which columns values go
-        index += 1 # Add a line every time you go through the loop
-        push_data_sheet.insert_row(row,index) # Add row to index line
+        row = [first_name, last_name, domain_name, email_address, confidence_score]
+        index += 1 
+        push_data_sheet.insert_row(row, index)
 
+
+## Call Functions
 get_data_from_workbook()
-push_data_to_workbook(contact_info)
-
-
+push_data_to_workbook()

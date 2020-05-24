@@ -6,7 +6,7 @@ from pprint import pprint # To pretty print json info in a more readable format
 
 
 # Global variables
-hunter_api_key = "48208a1a898e1aa968ba499e6267a03c24980fea" # API key that tells Hunter who we are when we make a GET request
+hunter_api_key = "thiswillbeastringyoucreateinyourhunteraccount" # API key that tells Hunter who we are when we make a GET request
 
 contact_info = {} # dictionary where we'll store each contact's information
 
@@ -17,14 +17,8 @@ people = [
         "last_name": "Kettering", 
         "domain_name": "creativeandproductive.com"
         },
-        {
-            "ID": 2, 
-            "first_name": "Quentin", 
-            "last_name": "Durantay", 
-            "domain_name": "dolead.com"
-            }, 
             {
-                "ID": 3, 
+                "ID": 2, 
                 "first_name": "Ziggy", 
                 "last_name": "Stardust", 
                 "domain_name": "mairie-paris.fr"
